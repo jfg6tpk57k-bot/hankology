@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hankology — The Science of Smash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --char:#1A1410;
+    --smoke:#241D18;
+    --smoke-2:#2B2420;
+    --red:#E8431F;
+    --red-dim:#B5341A;
+    --gold:#F2A93B;
+    --cream:#F7EFE2;
+    --cream-dim:#C9BFAE;
+    --green:#5C7A4A;
+    --line: rgba(247,239,226,0.12);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--char);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .display{
+    font-family:'Anton',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    line-height:0.92;
+  }
+
+  .eyebrow{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.18em;
+    font-size:12px;
+    color:var(--gold);
+  }
+
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  :focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:3px;
+  }
+
+  /* ============ texture ============ */
+  .grain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:999;
+    opacity:0.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+
+  .container{
+    max-width:1240px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  /* ============ nav ============ */
+  header{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    padding:22px 0;
+    transition:background 0.3s, padding 0.3s, border-color 0.3s;
+    border-bottom:1px solid transparent;
+  }
+  header.scrolled{
+    background:rgba(26,20,16,0.92);
+    backdrop-filter:blur(10px);
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .logo{
+    font-family:'Anton',sans-serif;
+    font-size:22px;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .logo .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--red);
+    display:inline-block;
+  }
+  .navlinks{
+    display:flex;
+    gap:36px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .navlinks a{
+    position:relative;
+    padding-bottom:4px;
+    opacity:0.85;
+    transition:opacity 0.2s;
+  }
+  .navlinks a:hover{opacity:1;}
+  .navlinks a::after{
+    content:'';
+    position:absolute;
+    left:0;bottom:0;
+    width:0;height:2px;
+    background:var(--red);
+    transition:width 0.25s;
+  }
+  .navlinks a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--red);
+    color:var(--cream);
+    padding:10px 22px;
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border-radius:3px;
+    transition:background 0.2s, transform 0.2s;
+  }
+  .nav-cta:hover{background:var(--gold);color:var(--char);transform:translateY(-1px);}
+  .burger-menu{display:none;background:none;border:none;color:var(--cream);font-size:24px;cursor:pointer;}
+
+  /* ============ hero ============ */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:120px;
+    padding-bottom:60px;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:'';
+    position:absolute;
+    top:-20%;right:-10%;
+    width:60vw;height:60vw;
+    background:radial-gradient(circle, rgba(232,67,31,0.25), transparent 70%);
+    pointer-events:none;
+  }
+  .hero::after{
+    content:'';
+    position:absolute;
+    bottom:-30%;left:-10%;
+    width:50vw;height:50vw;
+    background:radial-gradient(circle, rgba(242,169,59,0.12), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-inner{
+    position:relative;
+    z-index:2;
+  }
+  .hero-top-row{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:40px;
+    margin-bottom:18px;
+  }
+  .stamp{
+    flex-shrink:0;
+    width:128px;height:128px;
+    border:2px solid var(--gold);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-12deg);
+    position:relative;
+    opacity:0;
+    animation:stampIn 0.6s 1.1s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes stampIn{
+    from{opacity:0;transform:rotate(-30deg) scale(1.4);}
+    to{opacity:1;transform:rotate(-12deg) scale(1);}
+  }
+  .stamp-text{
+    font-family:'Anton',sans-serif;
+    font-size:9.5px;
+    letter-spacing:0.08em;
+    text-align:center;
+    color:var(--gold);
+    line-height:1.5;
+    text-transform:uppercase;
+  }
+  .stamp::before{
+    content:'';
+    position:absolute;
+    inset:9px;
+    border:1px dashed rgba(242,169,59,0.5);
+    border-radius:50%;
+  }
+
+  .hero h1{
+    font-size:clamp(58px, 11vw, 168px);
+    color:var(--cream);
+    overflow:hidden;
+  }
+  .hero h1 .line{
+    display:block;
+    overflow:hidden;
+  }
+  .hero h1 .line span{
+    display:block;
+    transform:translateY(110%);
+    animation:riseUp 0.85s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero h1 .line:nth-child(1) span{animation-delay:0.15s;}
+  .hero h1 .line:nth-child(2) span{animation-delay:0.3s; color:var(--red);}
+  @keyframes riseUp{to{transform:translateY(0);}}
+
+  .hero-sub{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:40px;
+    margin-top:28px;
+    padding-top:28px;
+    border-top:1px solid var(--line);
+  }
+  .hero-tagline{
+    font-size:18px;
+    color:var(--cream-dim);
+    max-width:420px;
+    line-height:1.5;
+  }
+  .hero-ctas{
+    display:flex;
+    gap:14px;
+    flex-shrink:0;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:16px 30px;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    border-radius:4px;
+    transition:transform 0.2s, background 0.2s, color 0.2s;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:var(--red);
+    color:var(--cream);
+  }
+  .btn-primary:hover{background:var(--gold); color:var(--char); transform:translateY(-2px);}
+  .btn-ghost{
+    border:1.5px solid var(--line);
+    color:var(--cream);
+  }
+  .btn-ghost:hover{border-color:var(--cream); transform:translateY(-2px);}
+
+  /* ============ marquee ============ */
+  .marquee-wrap{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:var(--smoke);
+    padding:18px 0;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+  .marquee{
+    display:inline-flex;
+    animation:scroll 32s linear infinite;
+  }
+  .marquee span{
+    font-family:'Anton',sans-serif;
+    font-size:22px;
+    text-transform:uppercase;
+    padding:0 28px;
+    color:var(--cream-dim);
+    display:inline-flex;
+    align-items:center;
+    gap:28px;
+  }
+  .marquee span.accent{color:var(--red);}
+  @keyframes scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+
+  /* ============ section basics ============ */
+  section{
+    padding:120px 0;
+    position:relative;
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:32px;
+    margin-bottom:64px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:clamp(40px,5vw,72px);
+    color:var(--cream);
+  }
+  .section-head p{
+    max-width:340px;
+    color:var(--cream-dim);
+    font-size:15px;
+    line-height:1.6;
+    padding-bottom:8px;
+  }
+
+  /* ============ menu / smash reports ============ */
+  .menu-section{background:var(--smoke);}
+  .menu-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .report-card{
+    background:var(--smoke);
+    padding:36px 30px;
+    position:relative;
+    transition:background 0.3s;
+  }
+  .report-card:hover{background:var(--smoke-2);}
+  .report-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+  }
+  .report-id{
+    font-size:11px;
+    letter-spacing:0.12em;
+    color:var(--gold);
+    font-weight:700;
+  }
+  .report-tag{
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    padding:3px 8px;
+    border-radius:20px;
+    color:var(--cream-dim);
+  }
+  .report-card h3{
+    font-family:'Anton',sans-serif;
+    font-size:28px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    line-height:1.05;
+  }
+  .report-card p.desc{
+    font-size:14px;
+    color:var(--cream-dim);
+    line-height:1.6;
+    margin-bottom:26px;
+    min-height:66px;
+  }
+  .specs{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .spec-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .spec-label{
+    font-size:10px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    width:96px;
+    flex-shrink:0;
+  }
+  .spec-bar{
+    flex:1;
+    height:4px;
+    background:rgba(247,239,226,0.1);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .spec-fill{
+    height:100%;
+    border-radius:2px;
+    background:var(--red);
+  }
+  .spec-fill.gold{background:var(--gold);}
+  .spec-fill.green{background:var(--green);}
+  .report-foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:20px;
+    border-top:1px dashed var(--line);
+  }
+  .price{
+    font-family:'Anton',sans-serif;
+    font-size:22px;
+    color:var(--cream);
+  }
+  .price span{font-size:13px;color:var(--cream-dim);}
+
+  /* ============ about / science ============ */
+  .about{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:80px;
+    align-items:center;
+  }
+  .about-visual{
+    position:relative;
+    aspect-ratio:4/5;
+    border-radius:6px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .about-visual img{
+    width:100%;height:100%;object-fit:cover;
+  }
+  .about-badge{
+    position:absolute;
+    bottom:24px;left:24px;
+    background:var(--char);
+    border:1px solid var(--gold);
+    padding:14px 18px;
+    border-radius:4px;
+    max-width:220px;
+  }
+  .about-badge .eyebrow{margin-bottom:6px;}
+  .about-badge p{font-size:13px;color:var(--cream-dim);line-height:1.4;}
+
+  .about-text .eyebrow{margin-bottom:18px;}
+  .about-text h2{
+    font-size:clamp(36px,4.5vw,56px);
+    margin-bottom:24px;
+    color:var(--cream);
+  }
+  .about-text h2 em{color:var(--red);font-style:normal;}
+  .about-text p{
+    color:var(--cream-dim);
+    font-size:16px;
+    line-height:1.75;
+    margin-bottom:20px;
+  }
+  .lab-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    margin-top:40px;
+    padding-top:32px;
+    border-top:1px solid var(--line);
+  }
+  .lab-stat .num{
+    font-family:'Anton',sans-serif;
+    font-size:40px;
+    color:var(--gold);
+    line-height:1;
+  }
+  .lab-stat .label{
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    margin-top:8px;
+  }
+
+  /* ============ locations ============ */
+  .locations-section{background:var(--smoke);}
+  .loc-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+  }
+  .loc-card{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:32px 28px;
+    position:relative;
+    transition:border-color 0.3s, transform 0.3s;
+  }
+  .loc-card:hover{
+    border-color:var(--red);
+    transform:translateY(-4px);
+  }
+  .loc-num{
+    font-family:'Anton',sans-serif;
+    font-size:13px;
+    color:var(--red);
+    letter-spacing:0.1em;
+    margin-bottom:18px;
+    display:block;
+  }
+  .loc-card h3{
+    font-family:'Anton',sans-serif;
+    font-size:26px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .loc-card .area{
+    font-size:13px;
+    color:var(--cream-dim);
+    margin-bottom:20px;
+    line-height:1.5;
+  }
+  .loc-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:var(--green);
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+  .loc-status .pulse{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--green);
+    position:relative;
+  }
+  .loc-status .pulse::after{
+    content:'';
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    border:1px solid var(--green);
+    animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%{transform:scale(0.6);opacity:0.9;}
+    100%{transform:scale(1.8);opacity:0;}
+  }
+
+  /* ============ cta band ============ */
+  .cta-band{
+    text-align:center;
+    padding:140px 0;
+    position:relative;
+  }
+  .cta-band h2{
+    font-size:clamp(40px,7vw,108px);
+    color:var(--cream);
+    margin-bottom:32px;
+  }
+  .cta-band h2 em{color:var(--red);font-style:normal;}
+  .cta-band .btn{padding:20px 44px;font-size:16px;}
+
+  /* ============ footer ============ */
+  footer{
+    border-top:1px solid var(--line);
+    padding:60px 0 32px;
+  }
+  .footer-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:40px;
+    margin-bottom:48px;
+    flex-wrap:wrap;
+  }
+  .footer-logo{
+    font-family:'Anton',sans-serif;
+    font-size:32px;
+  }
+  .footer-cols{
+    display:flex;
+    gap:64px;
+    flex-wrap:wrap;
+  }
+  .footer-col h4{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:16px;
+  }
+  .footer-col a, .footer-col p{
+    display:block;
+    font-size:14px;
+    color:var(--cream-dim);
+    margin-bottom:10px;
+    transition:color 0.2s;
+  }
+  .footer-col a:hover{color:var(--cream);}
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    padding-top:28px;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--cream-dim);
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  /* ============ reveal on scroll ============ */
+  .reveal{
+    opacity:0;
+    transform:translateY(28px);
+    transition:opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ============ responsive ============ */
+  @media (max-width:900px){
+    .navlinks{display:none;}
+    .burger-menu{display:block;}
+    .hero-top-row{flex-direction:row-reverse;}
+    .hero-sub{flex-direction:column;align-items:flex-start;gap:24px;}
+    .menu-grid{grid-template-columns:1fr;}
+    .about{grid-template-columns:1fr;gap:48px;}
+    .loc-grid{grid-template-columns:1fr;}
+    .footer-top{flex-direction:column;}
+    section{padding:80px 0;}
+    .stamp{width:96px;height:96px;}
+  }
+  @media (max-width:500px){
+    .container{padding:0 20px;}
+    .lab-stats{grid-template-columns:1fr;gap:18px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header id="siteHeader">
+  <div class="container">
+    <nav>
+      <a href="#top" class="logo"><span class="dot"></span>HANKOLOGY</a>
+      <div class="navlinks">
+        <a href="#menu">Menu</a>
+        <a href="#science">The Science</a>
+        <a href="#locations">Locations</a>
+      </div>
+      <a href="#order" class="nav-cta">Order Now</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="container hero-inner">
+    <div class="hero-top-row">
+      <h1 class="display">
+        <span class="line"><span>HANK</span></span>
+        <span class="line"><span>OLOGY</span></span>
+      </h1>
+      <div class="stamp">
+        <div class="stamp-text">EST. SMASH<br>SCIENCE<br>CAIRO, EG</div>
+      </div>
+    </div>
+    <div class="hero-sub">
+      <p class="hero-tagline">A gourmet fast-food lab studying one subject: how far a smash burger can go. Ultra-juicy patties, fusion experiments, loaded fries — served fast, served bold, across Cairo.</p>
+      <div class="hero-ctas">
+        <a href="#menu" class="btn btn-primary">View The Menu</a>
+        <a href="#locations" class="btn btn-ghost">Find a Branch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>
+      <span>OG CLASSIC</span>
+      <span class="accent">●</span>
+      <span>BACON SMASH</span>
+      <span class="accent">●</span>
+      <span>TARB BURGER</span>
+      <span class="accent">●</span>
+      <span>TOKYO BITE</span>
+      <span class="accent">●</span>
+      <span>HANK'S LOADED FRIES</span>
+      <span class="accent">●</span>
+      <span>OG CLASSIC</span>
+      <span class="accent">●</span>
+      <span>BACON SMASH</span>
+      <span class="accent">●</span>
+      <span>TARB BURGER</span>
+      <span class="accent">●</span>
+      <span>TOKYO BITE</span>
+      <span class="accent">●</span>
+      <span>HANK'S LOADED FRIES</span>
+      <span class="accent">●</span>
+    </span>
+  </div>
+</div>
+
+<section class="menu-section" id="menu">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 class="display">The Lab<br>Results</h2>
+      <p><span class="eyebrow">Field Notes — Findings 01–06</span><br><br>Every item logged for juice level, heat index and crunch factor before it earns a spot on the menu.</p>
+    </div>
+
+    <div class="menu-grid">
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 01</span>
+          <span class="report-tag">Signature</span>
+        </div>
+        <h3>The OG Classic</h3>
+        <p class="desc">Double smashed beef, American cheese, pickles and Hank's house sauce on a toasted bun. The control experiment — and still the favorite.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:92%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:30%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:55%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">220 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Smash Burger</span>
+        </div>
+      </div>
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 02</span>
+          <span class="report-tag">Bestseller</span>
+        </div>
+        <h3>Bacon Smash</h3>
+        <p class="desc">The OG, escalated — crisped bacon, double cheese and smoked sauce stacked over a charred double patty.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:88%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:40%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:75%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">255 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Smash Burger</span>
+        </div>
+      </div>
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 03</span>
+          <span class="report-tag">Fusion</span>
+        </div>
+        <h3>Tarb Burger</h3>
+        <p class="desc">Hankology's lab-original fusion patty — a bold, spiced twist layered with a sauce you won't find anywhere else in Cairo.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:85%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:65%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:60%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">265 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Signature Fusion</span>
+        </div>
+      </div>
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 04</span>
+          <span class="report-tag">Asian Fusion</span>
+        </div>
+        <h3>Tokyo Bite</h3>
+        <p class="desc">Crispy fried chicken glazed in an Asian-inspired sweet-heat sauce, finished with sesame and scallion.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:70%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:72%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:95%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">240 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Fried Chicken</span>
+        </div>
+      </div>
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 05</span>
+          <span class="report-tag">Crowd Favorite</span>
+        </div>
+        <h3>Hank's Loaded Fries</h3>
+        <p class="desc">A full tray of crisp fries buried under melted cheese, smash beef bits and Hank's signature drizzle.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:60%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:35%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:88%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">175 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Loaded Fries</span>
+        </div>
+      </div>
+
+      <div class="report-card reveal">
+        <div class="report-top">
+          <span class="report-id">SPECIMEN 06</span>
+          <span class="report-tag">Comfort</span>
+        </div>
+        <h3>Rich Pasta Bowls</h3>
+        <p class="desc">Slow, creamy, comforting pasta finished rich and heavy — the control variable for a good day.</p>
+        <div class="specs">
+          <div class="spec-row"><span class="spec-label">Juice Level</span><div class="spec-bar"><div class="spec-fill" style="width:50%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Heat Index</span><div class="spec-bar"><div class="spec-fill gold" style="width:20%"></div></div></div>
+          <div class="spec-row"><span class="spec-label">Crunch Factor</span><div class="spec-bar"><div class="spec-fill green" style="width:15%"></div></div></div>
+        </div>
+        <div class="report-foot">
+          <span class="price">195 <span>EGP</span></span>
+          <span class="eyebrow" style="color:var(--cream-dim)">Pasta Bowl</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="science">
+  <div class="container about">
+    <div class="about-text reveal">
+      <span class="eyebrow">The Method</span>
+      <h2 class="display">It's a <em>science</em>,<br>not a shortcut.</h2>
+      <p>Hankology started with one obsession: the smash. Hot griddle, hard press, maximum crust — every burger here is built on that same controlled reaction, then pushed into territory most fast-food kitchens won't touch.</p>
+      <p>That's where the Tarb Burger and the Tokyo Bite come in — fusion plates born from running Egyptian comfort food through global flavor labs, then handing the results to people who just want a really good burger, fast.</p>
+      <div class="lab-stats">
+        <div class="lab-stat">
+          <div class="num">3</div>
+          <div class="label">Active Branches</div>
+        </div>
+        <div class="lab-stat">
+          <div class="num">6+</div>
+          <div class="label">Signature Items</div>
+        </div>
+        <div class="lab-stat">
+          <div class="num">100%</div>
+          <div class="label">Smashed, Not Shaped</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-visual reveal">
+      <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=80" alt="Stack of smash burgers with melted cheese">
+      <div class="about-badge">
+        <span class="eyebrow">Lab Note</span>
+        <p>Patties hit the griddle thin, hard, and loud — that's where the crust comes from.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="locations-section" id="locations">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 class="display">Field<br>Stations</h2>
+      <p><span class="eyebrow">Three Active Sites</span><br><br>Hankology branches running hot across Cairo's busiest food corridors.</p>
+    </div>
+    <div class="loc-grid">
+      <div class="loc-card reveal">
+        <span class="loc-num">STATION 01</span>
+        <h3>Sheikh Zayed</h3>
+        <p class="area">El Sheikh Zayed, 6th of October — dine-in &amp; delivery.</p>
+        <div class="loc-status"><span class="pulse"></span>Open Now</div>
+      </div>
+      <div class="loc-card reveal">
+        <span class="loc-num">STATION 02</span>
+        <h3>New Cairo</h3>
+        <p class="area">Tagamoa, New Cairo — dine-in &amp; delivery.</p>
+        <div class="loc-status"><span class="pulse"></span>Open Now</div>
+      </div>
+      <div class="loc-card reveal">
+        <span class="loc-num">STATION 03</span>
+        <h3>Nasr City</h3>
+        <p class="area">Nasr City — dine-in &amp; delivery.</p>
+        <div class="loc-status"><span class="pulse"></span>Open Now</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" id="order">
+  <div class="container">
+    <h2 class="display reveal">Go run the<br><em>experiment.</em></h2>
+    <a href="#" class="btn btn-primary reveal">Order Now</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-logo display">HANKOLOGY</div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Menu</h4>
+          <a href="#menu">Smash Burgers</a>
+          <a href="#menu">Loaded Fries</a>
+          <a href="#menu">Pasta Bowls</a>
+        </div>
+        <div class="footer-col">
+          <h4>Branches</h4>
+          <p>Sheikh Zayed</p>
+          <p>New Cairo (Tagamoa)</p>
+          <p>Nasr City</p>
+        </div>
+        <div class="footer-col">
+          <h4>Follow</h4>
+          <a href="#">Instagram</a>
+          <a href="#">TikTok</a>
+          <a href="#">Facebook</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Hankology. The science of exceptional comfort food.</span>
+      <span>Cairo, Egypt</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // header scroll state
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // reveal on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.15});
+  revealEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
